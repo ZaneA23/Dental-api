@@ -12,32 +12,28 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id()->primary();
+            $table->id('user_id')->primary();
             $table->string('name')->unique();
             $table->string('email')->unique();
             $table->string('password');
             $table->timestamps();
         });
 
+        Schema::create('profiles', function (Blueprint $table) {
+            $table->unsignedBigInteger('profile_id')->primary();
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            $table->string('first_name');
+            $table->string('last_name');
+            $table->integer('age');
+            $table->string('address');
+            $table->integer('contact');
+            $table->string('email')->unique();
+            $table->timestamps(); 
+        });
+
         Schema::create('dentists', function (Blueprint $table) {
             $table->id('dentist_id')->primary();
-            $table->string('name')->unique();
-            $table->string('email')->unique();
-            $table->integer('years_of_service');
-        });
-
-        Schema::create('membership', function (Blueprint $table) {
-            $table->id('membership_id')->primary();
-            $table->unsignedBigInteger('promo_id');
-            $table->foreign('promo_id')->references('id')->on('promos')->constrained();
-            $table->unsignedBigInteger('profile_id');
-            $table->foreign('profile_id')->references('id')->on('profiles')->constrained();
-            $table->timestamps();
-        });
-
-        Schema::create('nurses', function (Blueprint $table) {
-            $table->id('nurse_id')->primary();
-            $table->foreign('user_id')->references('id')->on('users');
             $table->string('name')->unique();
             $table->string('email')->unique();
             $table->integer('years_of_service');
@@ -53,9 +49,29 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('membership', function (Blueprint $table) {
+            $table->id('membership_id')->primary();
+            #$table->unsignedBigInteger('promo_id');
+            $table->foreignId('promo_id')->references('promo_id')->on('promos');
+            #$table->unsignedBigInteger('profile_id');
+            $table->foreignId('profile_id')->references('profile_id')->on('profiles');
+            $table->timestamps();
+        });
+
+        Schema::create('nurses', function (Blueprint $table) {
+            $table->id('nurse_id')->primary();
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('user_id')->on('users');
+            $table->string('name')->unique();
+            $table->string('email')->unique();
+            $table->integer('years_of_service');
+        });
+
+       
         Schema::create('procedures', function (Blueprint $table) {
             $table->id('procedure_id')->primary();
-            $table->foreign('promo_id')->references('id')->on('promos');
+            $table->unsignedBigInteger('promo_id');
+            $table->foreign('promo_id')->references('promo_id')->on('promos');
             $table->string('description');
             $table->integer('cost');
         });
@@ -66,16 +82,21 @@ return new class extends Migration
             $table->timestamps();
             $table->date('treatment_date');
             $table->time('treatment_time');
-            $table->foreign('dentist_id')->references('id')->on('dentists');
-            $table->foreign('nurse_id')->references('id')->on('nurses');
-            $table->foreign('profile_id')->references('id')->on('profiles');
-            $table->foreign('procedure_id')->references('id')->on('procedures');
+            $table->unsignedBigInteger('dentist_id');
+            $table->foreign('dentist_id')->references('dentist_id')->on('dentists');
+            $table->unsignedBigInteger('nurse_id');
+            $table->foreign('nurse_id')->references('nurse_id')->on('nurses');
+            $table->unsignedBigInteger('profile_id');
+            $table->foreign('profile_id')->references('profile_id')->on('profiles');
+            $table->unsignedBigInteger('procedure_id');
+            $table->foreign('procedure_id')->references('procedure_id')->on('procedures');
         });
 
         
         Schema::create('reschedules', function (Blueprint $table) {
             $table->id('schedule_id')->primary();
-            $table->foreign('appointment_id')->references('id')->on('appointments');
+            $table->unsignedBigInteger('appointment_id');
+            $table->foreign('appointment_id')->references('appointment_id')->on('appointments');
             $table->date('new_schedule');
         });
     }
@@ -85,6 +106,16 @@ return new class extends Migration
      */
     public function down(): void
     {
+        
+        Schema::dropIfExists('membership');
         Schema::dropIfExists('users');
+        Schema::dropIfExists('profile');
+        Schema::dropIfExists('appointments');
+        Schema::dropIfExists('nurses');
+        Schema::dropIfExists('doctors');
+        Schema::dropIfExists('promos');
+        Schema::dropIfExists('reschedules');
+        Schema::dropIfExists('procedures');
+        
     }
 };
