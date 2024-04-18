@@ -11,17 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id('user_id')->primary();
-            $table->string('name')->unique();
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->timestamps();
+        Schema::create('reschedules', function (Blueprint $table) {
+            $table->id('schedule_id')->primary();
+            $table->unsignedBigInteger('appointment_id');
+            $table->foreign('appointment_id')->references('appointment_id')->on('appointments');
+            $table->date('new_schedule');
         });
-
-        
-        
-
     }
 
     /**
@@ -29,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        
-        Schema::dropIfExists('users');
-
+        Schema::dropIfExists('reschedules');
     }
 };
